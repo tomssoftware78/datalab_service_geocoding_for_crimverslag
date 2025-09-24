@@ -1,0 +1,24 @@
+version: 1
+disable_existing_loggers: false
+formatters:
+  detailed:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: detailed
+    stream: ext://sys.stderr
+  file_rolling_by_size:
+    class:  logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: detailed
+    filename: logs/geocode_for_crimverslag.log
+    maxBytes: 10485760  # 10 MB
+    backupCount: 5      # Keep up to 5 backup files
+  
+loggers:
+  root:
+    level: DEBUG
+    handlers: [ console, file_rolling_by_size ]
