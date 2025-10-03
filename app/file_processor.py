@@ -37,49 +37,49 @@ class FileProcessor:
             raise ValueError(f"❌ Failed to read {input_path.name}: {e}")
     
         if df.empty:
-            raise ValueError(f"❌ DataFrame is empty: {input_path.name}")
-    
-        # Ensure required columns exist
-        required_cols = ['Type', 'RefGeb', 'TxtCrim', 'TxtISLP', 'Land', 'Straat', 'Nummer']
-        missing_cols = [col for col in required_cols if col not in df.columns]
-        if missing_cols:
-            raise ValueError(f"❌ Missing required columns in {input_path.name}: {missing_cols}")
-    
-        self.logger.debug("📄 Loaded %d rows from %s", len(df), input_path.name)
-    
-        # Fix encoding
-        for col in df.select_dtypes(include='object').columns:
-            df[col] = df[col].apply(self.fix_encoding)
-    
-        # Filters
-        df = df[df['Type'] != 'IV']
-        df = df[~df['RefGeb'].str.contains(r'navolgend', case=False, na=False)]
-    
-        # Keywords
-        df['Trefwoorden'] = df.apply(self.find_keywords, axis=1)
-    
-        # Expand RefGeb
-        df['RefGebVoluit'] = df['RefGeb'].apply(self.expand_refgeb)
-    
-        # Reorder columns
-        cols = df.columns.tolist()
-        if 'RefGebVoluit' in cols:
-            cols.remove('RefGebVoluit')
-            insert_index = cols.index('RefGeb') + 1 if 'RefGeb' in cols else len(cols)
-            cols = cols[:insert_index] + ['RefGebVoluit'] + cols[insert_index:]
-        df = df[cols]
-    
-        if 'Trefwoorden' in df.columns:
+            self.logger.debug(f"❌ DataFrame is empty: {input_path.name}")
+        else:
+            # Ensure required columns exist
+            required_cols = ['Type', 'RefGeb', 'TxtCrim', 'TxtISLP', 'Land', 'Straat', 'Nummer']
+            missing_cols = [col for col in required_cols if col not in df.columns]
+            if missing_cols:
+                raise ValueError(f"❌ Missing required columns in {input_path.name}: {missing_cols}")
+        
+            self.logger.debug("📄 Loaded %d rows from %s", len(df), input_path.name)
+        
+            # Fix encoding
+            for col in df.select_dtypes(include='object').columns:
+                df[col] = df[col].apply(self.fix_encoding)
+        
+            # Filters
+            df = df[df['Type'] != 'IV']
+            df = df[~df['RefGeb'].str.contains(r'navolgend', case=False, na=False)]
+        
+            # Keywords
+            df['Trefwoorden'] = df.apply(self.find_keywords, axis=1)
+        
+            # Expand RefGeb
+            df['RefGebVoluit'] = df['RefGeb'].apply(self.expand_refgeb)
+        
+            # Reorder columns
             cols = df.columns.tolist()
-            cols.remove('Trefwoorden')
-            insert_index = cols.index('Land') + 1 if 'Land' in cols else len(cols)
-            cols = cols[:insert_index] + ['Trefwoorden'] + cols[insert_index:]
+            if 'RefGebVoluit' in cols:
+                cols.remove('RefGebVoluit')
+                insert_index = cols.index('RefGeb') + 1 if 'RefGeb' in cols else len(cols)
+                cols = cols[:insert_index] + ['RefGebVoluit'] + cols[insert_index:]
             df = df[cols]
-    
-        df['Localisatie'] = df['Straat'].fillna('') + ' ' + df['Nummer'].fillna('').astype(str)
-    
-        # lon, lat en score vragen aan de geocoding service en toevoegen aan dataframe
-        df[["lon", "lat", "score"]] = df.apply(lambda row: pd.Series(self.geocoding_service.get_x_y_from_geocoding_service(row)), axis=1)
+        
+            if 'Trefwoorden' in df.columns:
+                cols = df.columns.tolist()
+                cols.remove('Trefwoorden')
+                insert_index = cols.index('Land') + 1 if 'Land' in cols else len(cols)
+                cols = cols[:insert_index] + ['Trefwoorden'] + cols[insert_index:]
+                df = df[cols]
+        
+            df['Localisatie'] = df['Straat'].fillna('') + ' ' + df['Nummer'].fillna('').astype(str)
+        
+            # lon, lat en score vragen aan de geocoding service en toevoegen aan dataframe
+            df[["lon", "lat", "score"]] = df.apply(lambda row: pd.Series(self.geocoding_service.get_x_y_from_geocoding_service(row)), axis=1)
 
 
         df.to_excel(output_path, index=False)
