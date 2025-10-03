@@ -24,24 +24,12 @@ class Watcher:
         seen_files = dict()
         last_file_time = None
         merge_wait_seconds = 30
-        merge_performed = False
 
         while True:
             new_file_found = self.poll_folder(WATCH_FOLDER, seen_files)
         
             if new_file_found:
                 last_file_time = datetime.now()
-                merge_performed = False
-
-            if (
-                not new_file_found
-                and last_file_time is not None
-                and not merge_performed
-                and datetime.now() - last_file_time > timedelta(seconds=merge_wait_seconds)
-            ):
-                self.logger.debug("🕒 No new files for 30s — starting merge.")
-                self.merge_files()
-                merge_performed = True
  
             time.sleep(2)    
 
@@ -57,35 +45,6 @@ class Watcher:
                     new_file_found = True
         return new_file_found
     
-
-    def merge_files(self):
-        try:
-            files = [f for f in OUTPUT_FOLDER.glob("*.xlsx") if not f.name.startswith("~$") and not f.name.startswith("merged_")]
-            if not files:
-                self.logger.debug("⚠️ No files found for merging.")
-                return
-
-            merged = pd.DataFrame()
-
-            for i, file in enumerate(files):
-                self.logger.debug("📄 Reading: %s", file.name)
-                try:
-                    df = pd.read_excel(file)
-                    merged = df if i == 0 else pd.concat([merged, df], ignore_index=True)
-
-                    #Delete the file after succesful read
-                    file.unlink()
-                    self.logger.debug("🗑️ Deleted source file: %s", file.name)
-
-                except Exception as e:
-                    self.logger.error("❌ Error reading %s", file.name, exc_info=True)
-
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            output_path = OUTPUT_FOLDER / f"merged_{timestamp}.xlsx"
-            merged.to_excel(output_path, index=False)
-            self.logger.debug("✅ Merged %d files into: %s", len(files), output_path.name)
-        except Exception as e:
-            self.logger.debug("❌ Merge failed: %s", e, exc_info=True)
 
     def handle_file(self, path: Path):
         file_processor = FileProcessor()
