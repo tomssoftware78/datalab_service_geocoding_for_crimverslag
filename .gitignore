@@ -12,3 +12,6 @@ out/
 in/
 *.xls
 *.xlsx
+
+*.log*
+*.log
