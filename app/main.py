@@ -1,11 +1,13 @@
 import os
 import yaml
+import sys
 import logging
 import logging.config
 
 from dotenv import load_dotenv
 
 from watcher import Watcher
+from service_available_checker import ServiceAvailableChecker
 from config import WATCH_FOLDER, OUTPUT_FOLDER
 
 # Get the directory of the current script
@@ -26,5 +28,8 @@ if __name__ == "__main__":
     logger.debug('WATCH_FOLDER: %s', WATCH_FOLDER)
     logger.debug('OUTPUT_FOLDER: %s', OUTPUT_FOLDER)
 
+    #check necessary services are up and running
+    ServiceAvailableChecker().check_all_services()
+        
     watcher = Watcher()
     watcher.start()
