@@ -53,5 +53,5 @@ deploy-prod:
     # Voer Ansible uit
 ##    - ansible-playbook -i ./deploy/infra/inventory/hosts.ini ./deploy/infra/playbooks/my-test-project.yml
 ##      --vault-password-file .vault-pass.txt --extra-vars "deployment_path=$CI_PROJECT_DIR/deployment_files"
-    when: manual      
+  when: manual      
 
