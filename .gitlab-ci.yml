@@ -1,0 +1,57 @@
+stages:
+  - build
+  - push
+  - deploy
+
+variables:
+  APP_NAME: "geocoding_for_crimverslag"
+  CONTAINER_IMAGE: "docker-host.ccuvpndom.com:5000/geocoding_for_crimverslag"
+
+.build_image:
+  stage: build
+  image: docker:27.4.0
+  variables:
+    DOCKER_HOST: unix:///var/run/docker.sock
+  before_script:
+    - docker info
+  script:
+    - ls -la
+    - cat .env
+    - docker build --no-cache -t $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA .
+    - docker image push $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA
+  when: manual
+
+deploy-prod:
+  stage: deploy
+  image:
+    name: cytopia/ansible:latest
+  before_script:
+    - apk update && apk add openssh-client git
+    - mkdir -p ~/.ssh
+    - eval $(ssh-agent -s)  # Start the SSH agent
+    - echo "$SSH_KEY" | ssh-add -  # Add the SSH private key from GitLab CI secrets to the agent
+    - echo $CI_JOB_NAME
+    - echo "$SSH_KEY"
+    - echo "$ANSIBLE_VAULT_PASSWORD" > .vault-pass.txt
+    - chmod 600 .vault-pass.txt
+    - echo "$ANSIBLE_VAULT_PASSWORD"
+    - git clone "http://gitlab-ci-token:${INFRASTRUCTURE_GROUP_TOKEN}@192.168.70.5:8088/infrastructure/deploy.git"
+    # Decrypt de vault naar een tijdelijk, leesbaar YAML-bestand
+    - ansible-vault decrypt --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") ./deploy/infra/group_vars/docker-host01/geocoding_for_crimverslag.vault.yml --output /tmp/secrets.decrypted.yml
+    - cat /tmp/secrets.decrypted.yml
+
+  script:
+    - mkdir $CI_PROJECT_DIR/deployment_files
+##    - cp docker-compose.yml.prd $CI_PROJECT_DIR/deployment_files/docker-compose.yml
+##    - cp .env $CI_PROJECT_DIR/deployment_files
+    - pwd 
+    - ls -la $CI_PROJECT_DIR/deployment_files 
+#    - ls -la infra/group_vars/docker-host01/
+#    - ls -la
+#    - ls -la ../
+#    - cat ../.vault-pass.txt
+    # Voer Ansible uit
+##    - ansible-playbook -i ./deploy/infra/inventory/hosts.ini ./deploy/infra/playbooks/my-test-project.yml
+##      --vault-password-file .vault-pass.txt --extra-vars "deployment_path=$CI_PROJECT_DIR/deployment_files"
+    when: manual      
+
