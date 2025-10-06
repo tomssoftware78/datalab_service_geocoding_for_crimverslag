@@ -51,7 +51,7 @@ deploy-prod:
 #    - ls -la ../
 #    - cat ../.vault-pass.txt
     # Voer Ansible uit
-##    - ansible-playbook -i ./deploy/infra/inventory/hosts.ini ./deploy/infra/playbooks/my-test-project.yml
-##      --vault-password-file .vault-pass.txt --extra-vars "deployment_path=$CI_PROJECT_DIR/deployment_files"
+    - ansible-playbook -i ./deploy/infra/inventory/hosts.ini ./deploy/infra/playbooks/geocoding_for_crimverslag.yml
+      --vault-password-file .vault-pass.txt --extra-vars "deployment_path=$CI_PROJECT_DIR/deployment_files" --limit docker_host01
   when: manual      
 
