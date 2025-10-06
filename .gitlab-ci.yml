@@ -37,7 +37,7 @@ deploy-prod:
     - echo "$ANSIBLE_VAULT_PASSWORD"
     - git clone "http://gitlab-ci-token:${INFRASTRUCTURE_GROUP_TOKEN}@192.168.70.5:8088/infrastructure/deploy.git"
     # Decrypt de vault naar een tijdelijk, leesbaar YAML-bestand
-    - ansible-vault decrypt --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") ./deploy/vaults/docker-host01/geocoding_for_crimverslag.vault.yml --output /tmp/secrets.decrypted.yml
+    - ansible-vault decrypt --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD") ./deploy/vaults/docker_host01/geocoding_for_crimverslag.vault.yml --output /tmp/secrets.decrypted.yml
     - cat /tmp/secrets.decrypted.yml
 
   script:
