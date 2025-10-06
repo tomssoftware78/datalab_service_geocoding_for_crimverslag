@@ -7,7 +7,7 @@ variables:
   APP_NAME: "geocoding_for_crimverslag"
   CONTAINER_IMAGE: "docker-host.ccuvpndom.com:5000/geocoding_for_crimverslag"
 
-build_image:
+.build_image:
   stage: build
   image: docker:27.4.0
   variables:
