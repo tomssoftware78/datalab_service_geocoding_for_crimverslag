@@ -26,6 +26,6 @@ export SUBDIR_DEST
  
 echo "starting watcher ..."
 # Start het Python script
-python3 app/main.py 2>&1
+python3 main.py 2>&1
  
 #set +x
