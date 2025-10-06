@@ -1,0 +1,6 @@
+pandas==2.2.3
+openpyxl==3.1.5
+watchdog==6.0.0
+xlrd==1.2.0
+lxml==6.0.0
+dotenv==0.9.9
