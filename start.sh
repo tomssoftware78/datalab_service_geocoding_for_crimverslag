@@ -12,20 +12,20 @@ SUBDIR_DEST=$6
 echo "mounting share..."
 # Mount de SMB share (pas aan naar jouw specifieke opties)
 mkdir -p $MOUNT_POINT
+mount -t cifs "$SHARE_SRC" "$MOUNT_POINT" -o username="$USERNAME",password="$PASSW",vers=2.0,uid=1000
 
 # Mount alleen als SHARE_SRC niet leeg is
 #if [ -n "$SHARE_SRC" ]; then
 #  mount -t cifs "$SHARE_SRC" "$MOUNT_POINT" -o username="$USERNAME",password="$PASSW",vers=2.0,uid=1000
 #fi
 
-
 # Export for Python to access
-export MOUNT_POINT
-export SUBDIR_SRC
-export SUBDIR_DEST
+##export MOUNT_POINT
+##export SUBDIR_SRC
+##export SUBDIR_DEST
  
 echo "starting watcher ..."
 # Start het Python script
-python3 main.py 2>&1
+python3 main.py "$MOUNT_POINT" "$SUBDIR_SRC" "$SUBDIR_DEST" 2>&1
  
 #set +x

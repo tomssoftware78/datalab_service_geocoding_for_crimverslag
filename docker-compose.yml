@@ -1,0 +1,21 @@
+version: '3.9'
+
+services:
+  crimverslag-geocodering:
+    env_file: .env
+    container_name: crimverslag-geocodering
+    image: 'crimverslag-geocodering:latest'
+    restart: unless-stopped
+    privileged: true
+    environment:
+      PASSW: '${PASSW}'
+      SHARE_SRC: '${SHARE_SRC}'
+      USERNAME: '${USERNAME}'
+      MOUNT_POINT: '${MOUNT_POINT}'
+      SUBDIR_SRC: '${SUBDIR_SRC}'
+      SUBDIR_DEST: '${SUBDIR_DEST}'
+    #ports:
+    #    #only for debugging purposes
+    #    - "5678:5678"
+    #volumes:
+    #  - .:/app

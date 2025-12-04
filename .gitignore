@@ -15,3 +15,5 @@ in/
 
 *.log*
 *.log
+
+*env*
