@@ -20,7 +20,7 @@ build_image:
     - docker image push $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA
   when: manual
 
-deploy-prod:
+.deploy-prod:
   stage: deploy
   image:
     name: cytopia/ansible:latest
