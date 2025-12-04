@@ -55,31 +55,32 @@ class FileProcessor:
             df = df[df['Type'] != 'IV']
             df = df[~df['RefGeb'].str.contains(r'navolgend', case=False, na=False)]
         
-            # Keywords
-            df['Trefwoorden'] = df.apply(self.find_keywords, axis=1)
-        
-            # Expand RefGeb
-            df['RefGebVoluit'] = df['RefGeb'].apply(self.expand_refgeb)
-        
-            # Reorder columns
-            cols = df.columns.tolist()
-            if 'RefGebVoluit' in cols:
-                cols.remove('RefGebVoluit')
-                insert_index = cols.index('RefGeb') + 1 if 'RefGeb' in cols else len(cols)
-                cols = cols[:insert_index] + ['RefGebVoluit'] + cols[insert_index:]
-            df = df[cols]
-        
-            if 'Trefwoorden' in df.columns:
+            if not df.empty:
+                # Keywords
+                df['Trefwoorden'] = df.apply(self.find_keywords, axis=1)
+            
+                # Expand RefGeb
+                df['RefGebVoluit'] = df['RefGeb'].apply(self.expand_refgeb)
+            
+                # Reorder columns
                 cols = df.columns.tolist()
-                cols.remove('Trefwoorden')
-                insert_index = cols.index('Land') + 1 if 'Land' in cols else len(cols)
-                cols = cols[:insert_index] + ['Trefwoorden'] + cols[insert_index:]
+                if 'RefGebVoluit' in cols:
+                    cols.remove('RefGebVoluit')
+                    insert_index = cols.index('RefGeb') + 1 if 'RefGeb' in cols else len(cols)
+                    cols = cols[:insert_index] + ['RefGebVoluit'] + cols[insert_index:]
                 df = df[cols]
-        
-            df['Localisatie'] = df['Straat'].fillna('') + ' ' + df['Nummer'].fillna('').astype(str)
-        
-            # lon, lat en score vragen aan de geocoding service en toevoegen aan dataframe
-            df[["lon", "lat", "score"]] = df.apply(lambda row: pd.Series(self.geocoding_service.get_x_y_from_geocoding_service(row)), axis=1)
+            
+                if 'Trefwoorden' in df.columns:
+                    cols = df.columns.tolist()
+                    cols.remove('Trefwoorden')
+                    insert_index = cols.index('Land') + 1 if 'Land' in cols else len(cols)
+                    cols = cols[:insert_index] + ['Trefwoorden'] + cols[insert_index:]
+                    df = df[cols]
+            
+                df['Localisatie'] = df['Straat'].fillna('') + ' ' + df['Nummer'].fillna('').astype(str)
+            
+                # lon, lat en score vragen aan de geocoding service en toevoegen aan dataframe
+                df[["lon", "lat", "score"]] = df.apply(lambda row: pd.Series(self.geocoding_service.get_x_y_from_geocoding_service(row)), axis=1)
 
 
         df.to_excel(output_path, index=False)
