@@ -1,12 +1,11 @@
-version: '3.9'
-
 services:
   crimverslag-geocodering:
     env_file: .env
     container_name: crimverslag-geocodering
-    image: 'crimverslag-geocodering:latest'
+    image: 'docker-host.ccuvpndom.com:5000/crimverslag-geocodering:latest'
     restart: unless-stopped
     privileged: true
+    network_mode: "host"
     environment:
       PASSW: '${PASSW}'
       SHARE_SRC: '${SHARE_SRC}'
@@ -14,6 +13,8 @@ services:
       MOUNT_POINT: '${MOUNT_POINT}'
       SUBDIR_SRC: '${SUBDIR_SRC}'
       SUBDIR_DEST: '${SUBDIR_DEST}'
+    volumes:
+      - ./app/logging_config.yml:/app/logging_config.yml:ro
     #ports:
     #    #only for debugging purposes
     #    - "5678:5678"
